@@ -145,6 +145,15 @@ var allowed_videoModes = videoModes.split('|');
 var tags = 'accelerator|address|allow-fields|always-on-top|amcp|args|aspect-ratio|audio|auto-deinterlace|auto-load|blend-modes|bluefish|borderless|buffer-depth|channel|channel-grid|channel-id|channel-layout|channel-layouts|channels|colour-space|consumers|controllers|data-path|decklink|default-port|device|disable-send-to-amcp-clients|embedded-audio|enable-gpu|ffmpeg|filename|flash|font-path|force-deinterlace|generate-delay-millis|generate-thumbnails|height|host|html|interactive|internal-keyer-audio-source|key-device|keyer|key-only|latency|lock-clear-phrase|log-categories|log-level|log-path|media-path|media-server|mipmap|mipmapping-default-on|mix-config|mix-configs|mixer|mono-streams|name|ndi|newtek-ivga|osc|path|paths|port|predefined-client|predefined-clients|producer|producers|protocol|remote-debugging-port|sbs-key|scan-interval-millis|screen|sdi-stream|separate-key|straight-alpha|straight-alpha-output|stretch|syncto|system-audio|tcp|template-host|template-hosts|template-path|thumbnail-path|thumbnails|thumbnails-path|timecode|timecode_layer|video-grid|video-mode|vsync|watchdog|width|windowed|x|y|0|1|2|3|4|5|6|7|8|9|10|11|12|13';
 var allowed_tags = tags.split('|');
 
+/* This is the bare minimum config for CCG to run
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <paths></paths>
+  <channels></channels>
+  <controllers></controllers>
+</configuration>
+*/
+
 function validate() {
 	var xmlData = config.value;
 
@@ -170,6 +179,7 @@ function validate() {
 		summarize();
 	}
 }
+
 var jsonObj;
 function verifyConfig(xmlData) {
 	jsonObj = parser.parse(xmlData, parserOptions);
@@ -177,6 +187,17 @@ function verifyConfig(xmlData) {
 	Object.entries(jsonObj).forEach(function(c) {
 		if(c[0].toLowerCase() === 'configuration') {
 			updateResults('First tag is: <b>&lt;configuration&gt;</b>');
+
+			if(typeof jsonObj.configuration.paths === 'undefined') {
+				updateError('Config is not valid - it must specify &lt;paths&gt');
+			}
+			if(typeof jsonObj.configuration.channels === 'undefined') {
+				updateError('Config is not valid - it must specify &lt;channels&gt');
+			}
+			if(typeof jsonObj.configuration.controllers === 'undefined') {
+				updateError('Config is not valid - it must specify &lt;controllers&gt');
+			}
+
 			checkConfig( c[1] );
 		} else {
 			updateError('Config is not valid - first tag is NOT &lt;configuration&gt');
